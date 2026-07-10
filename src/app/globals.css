@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+:root {
+  /* Corgi Cafe tokens: espresso room, crema text, corgi-fawn accent */
+  --espresso: #251a13;
+  --roast: #32251c;
+  --roast-deep: #2b1f17;
+  --crema: #f2e6d4;
+  --crema-dim: #cbb9a2;
+  --fawn: #e8933a;
+  --fawn-deep: #b96a1d;
+  --matcha: #93c37d;
+  --line: #4a382a;
+  --receipt: #f2e6d4;
+  --receipt-ink: #33241a;
+}
+
+body {
+  background: var(--espresso);
+  color: var(--crema);
+  font-family: var(--font-plex-sans), system-ui, sans-serif;
+  background-image: radial-gradient(
+    ellipse 80% 50% at 50% -10%,
+    rgba(232, 147, 58, 0.08),
+    transparent
+  );
+}
+
+.font-display {
+  font-family: var(--font-fraunces), Georgia, serif;
+}
+
+.font-data {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+/* --- live pulse dot -------------------------------------------------- */
+
+.pulse-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--matcha);
+  box-shadow: 0 0 0 0 rgba(147, 195, 125, 0.6);
+  animation: pulse 2.4s ease-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(147, 195, 125, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(147, 195, 125, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(147, 195, 125, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-dot {
+    animation: none;
+  }
+}
+
+/* --- the receipt (signature element) --------------------------------- */
+
+.receipt {
+  background: var(--receipt);
+  color: var(--receipt-ink);
+  /* perforated tear along the bottom edge */
+  --notch: 0.65rem;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--notch)),
+    97.5% 100%, 95% calc(100% - var(--notch)),
+    92.5% 100%, 90% calc(100% - var(--notch)),
+    87.5% 100%, 85% calc(100% - var(--notch)),
+    82.5% 100%, 80% calc(100% - var(--notch)),
+    77.5% 100%, 75% calc(100% - var(--notch)),
+    72.5% 100%, 70% calc(100% - var(--notch)),
+    67.5% 100%, 65% calc(100% - var(--notch)),
+    62.5% 100%, 60% calc(100% - var(--notch)),
+    57.5% 100%, 55% calc(100% - var(--notch)),
+    52.5% 100%, 50% calc(100% - var(--notch)),
+    47.5% 100%, 45% calc(100% - var(--notch)),
+    42.5% 100%, 40% calc(100% - var(--notch)),
+    37.5% 100%, 35% calc(100% - var(--notch)),
+    32.5% 100%, 30% calc(100% - var(--notch)),
+    27.5% 100%, 25% calc(100% - var(--notch)),
+    22.5% 100%, 20% calc(100% - var(--notch)),
+    17.5% 100%, 15% calc(100% - var(--notch)),
+    12.5% 100%, 10% calc(100% - var(--notch)),
+    7.5% 100%, 5% calc(100% - var(--notch)),
+    2.5% 100%, 0 calc(100% - var(--notch))
+  );
+}
+
+.receipt-rule {
+  border: none;
+  border-top: 1.5px dashed rgba(51, 36, 26, 0.35);
+}
+
+/* --- focus ------------------------------------------------------------ */
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--fawn);
+  outline-offset: 2px;
+  border-radius: 2px;
+}

@@ -1,0 +1,43 @@
+// Corgi Cafe Commit Leaderboard — data model (see docs/superpowers/specs/*-design.md)
+// SQLite for v1; swap provider + DATABASE_URL to "postgresql" on deploy.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int       @id @default(autoincrement())
+  githubId       Int       @unique @map("github_id")
+  username       String
+  avatarUrl      String    @map("avatar_url")
+  encAccessToken String    @map("enc_access_token")
+  totalCommits   Int       @default(0) @map("total_commits")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  sessions       Session[]
+
+  @@map("users")
+}
+
+model Session {
+  id           Int       @id @default(autoincrement())
+  userId       Int       @map("user_id")
+  user         User      @relation(fields: [userId], references: [id])
+  startedAt    DateTime  @default(now()) @map("started_at")
+  endedAt      DateTime? @map("ended_at")
+  startCount   Int       @map("start_count")
+  currentCount Int       @map("current_count")
+  commits      Int       @default(0)
+  lastSeenAt   DateTime  @default(now()) @map("last_seen_at")
+  lastIp       String    @map("last_ip")
+  status       String    @default("open") // "open" | "closed"
+
+  @@index([status])
+  @@index([userId, status])
+  @@index([status, lastSeenAt])
+  @@map("sessions")
+}
