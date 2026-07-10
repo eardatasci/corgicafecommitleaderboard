@@ -5,7 +5,7 @@ import { PrismaClient } from "@prisma/client";
 const db = new PrismaClient();
 
 const users = [
-  { githubId: 900001, username: "mochi-ships", totalCommits: 128 },
+  { githubId: 900001, username: "mochi-ships", totalCommits: 128, lastStatusText: "rewriting the corgi cam firmware in rust" },
   { githubId: 900002, username: "ein-the-data-dog", totalCommits: 87 },
   { githubId: 900003, username: "stubby-stack", totalCommits: 55 },
   { githubId: 900004, username: "loaf-of-code", totalCommits: 31 },
@@ -20,7 +20,7 @@ for (const u of users) {
       avatarUrl: `https://avatars.githubusercontent.com/u/${u.githubId}?v=4`,
       encAccessToken: "demo.demo.demo",
     },
-    update: { totalCommits: u.totalCommits },
+    update: { totalCommits: u.totalCommits, lastStatusText: u.lastStatusText ?? null },
   });
 }
 
@@ -36,6 +36,7 @@ await db.session.create({
     currentCount: 407,
     commits: 7,
     lastIp: "203.0.113.7",
+    statusText: "rewriting the corgi cam firmware in rust",
   },
 });
 await db.session.create({
