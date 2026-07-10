@@ -1,6 +1,7 @@
 import type { User } from "@prisma/client";
 import { config } from "./config";
 import { decryptToken } from "./crypto";
+import { noteRateBudget } from "./poll-schedule";
 
 export interface GithubViewer {
   id: number;
@@ -54,6 +55,10 @@ const CONTRIBUTIONS_QUERY = `
         restrictedContributionsCount
       }
     }
+    rateLimit {
+      remaining
+      resetAt
+    }
   }
 `;
 
@@ -77,6 +82,13 @@ export async function fetchContributionCount(accessToken: string): Promise<numbe
   });
   if (!res.ok) throw new Error(`GraphQL failed: ${res.status}`);
   const data = await res.json();
+  const rl = data?.data?.rateLimit;
+  if (rl) {
+    noteRateBudget({
+      remaining: rl.remaining,
+      resetAtMs: new Date(rl.resetAt).getTime(),
+    });
+  }
   const col = data?.data?.viewer?.contributionsCollection;
   if (!col) throw new Error(`GraphQL error: ${JSON.stringify(data.errors ?? data)}`);
   return col.totalCommitContributions + col.restrictedContributionsCount;

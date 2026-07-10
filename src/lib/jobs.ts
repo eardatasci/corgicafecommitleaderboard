@@ -1,5 +1,6 @@
 import { config } from "./config";
 import { pollOpenSessions, sweepStaleSessions } from "./presence";
+import { nextPollDelayMs, takeWorstRateBudget } from "./poll-schedule";
 
 // The sweep runs two ways so free-tier hosts that spin down between requests
 // stay correct: a timer while the server is up (instrumentation.ts), and
@@ -29,7 +30,20 @@ export function startBackgroundJobs(): void {
     lazySweep().catch(() => {});
   }, 60_000).unref();
 
-  setInterval(() => {
-    pollOpenSessions().catch((err) => console.error("poll failed:", err));
-  }, config.sessionPollSec * 1_000).unref();
+  // Self-scheduling poll loop: runs at SESSION_POLL_SEC while every token has
+  // rate budget, and stretches out automatically when one runs low.
+  const pollLoop = async () => {
+    try {
+      await pollOpenSessions();
+    } catch (err) {
+      console.error("poll failed:", err);
+    }
+    const delay = nextPollDelayMs(
+      config.sessionPollSec,
+      takeWorstRateBudget(),
+      Date.now(),
+    );
+    setTimeout(pollLoop, delay).unref();
+  };
+  setTimeout(pollLoop, config.sessionPollSec * 1_000).unref();
 }

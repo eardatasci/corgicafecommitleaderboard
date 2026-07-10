@@ -248,7 +248,7 @@ function HereNow({ entries }: { entries?: HereNowEntry[] }) {
           className="font-data text-center text-[0.65rem] tracking-wider"
           style={{ color: "rgba(51,36,26,0.55)" }}
         >
-          commits this visit · updates every minute
+          commits this visit · updates every ~15 sec
         </p>
       </div>
     </section>

@@ -52,10 +52,11 @@ export const config = {
   },
   /**
    * Seconds between in-session contribution re-queries (floor 15s). Each
-   * query costs ~1 of a user's 5000/hr GraphQL points, so short is cheap.
+   * query costs ~1 of a user's 5000/hr GraphQL points, so short is cheap;
+   * the poll loop backs off automatically if a token's budget runs low.
    */
   get sessionPollSec() {
-    return Math.max(15, int("SESSION_POLL_SEC", 60));
+    return Math.max(15, int("SESSION_POLL_SEC", 15));
   },
   get baseUrl() {
     return process.env.BASE_URL ?? "http://localhost:3000";
