@@ -35,7 +35,7 @@ scoreboard. Three changes:
 - `User.lastStatusText String?` — the most recently saved status, used only to
   pre-fill the prompt on the next visit. Updated every time a status is saved.
 
-Statuses are plain text, trimmed, max 140 characters (server-enforced clamp).
+Statuses are plain text, trimmed, max 200 characters (server-enforced clamp).
 Migration added for the SQLite schema and mirrored in
 `prisma/schema.postgres.prisma`.
 
@@ -118,7 +118,7 @@ Shown only when the viewer is present and their open session has no
 - Unit tests (vitest, alongside existing suites) for status logic:
   - saves to the open session and updates `lastStatusText`,
   - 409 when no open session,
-  - trim + 140-char clamp,
+  - trim + 200-char clamp,
   - empty text clears the session status but preserves `lastStatusText`,
   - leaderboard includes `statusText` in `hereNow`.
 - UI verified manually against the demo seed (`prisma/seed-demo.mjs`).
