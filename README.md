@@ -1,5 +1,7 @@
 # Corgi Cafe Commit Leaderboard 🐾
 
+**Live at [corgicafecommitleaderboard.com](https://corgicafecommitleaderboard.com)**
+
 A fun leaderboard for the Corgi Cafe — a 24-hour cafe for tech people in SF. Sign
 in with GitHub, get verified as physically present via the cafe's public IP, and
 rack up a score equal to the GitHub contributions you make **while you're here**.
