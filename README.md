@@ -68,7 +68,7 @@ with GitHub mocked.
 | `TRUSTED_PROXY_HOPS` | Fallback: rightmost `X-Forwarded-For` entries you control (1 behind one proxy) |
 | `BASE_URL` | Public URL of the app (OAuth redirects) |
 | `HEARTBEAT_TIMEOUT_MIN` | Grace window before marking OUT (default 5) |
-| `SESSION_POLL_MIN` | In-session contribution re-query interval (default 3) |
+| `SESSION_POLL_SEC` | In-session contribution re-query interval (default 60, floor 15) |
 | `DEV_FAKE_IP` | Dev only: pretend heartbeats come from this IP. Never set in prod |
 
 ## Deploying (free tier)

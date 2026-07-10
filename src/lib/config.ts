@@ -50,9 +50,12 @@ export const config = {
   get heartbeatTimeoutMin() {
     return int("HEARTBEAT_TIMEOUT_MIN", 5);
   },
-  /** Minutes between in-session contribution re-queries. */
-  get sessionPollMin() {
-    return int("SESSION_POLL_MIN", 3);
+  /**
+   * Seconds between in-session contribution re-queries (floor 15s). Each
+   * query costs ~1 of a user's 5000/hr GraphQL points, so short is cheap.
+   */
+  get sessionPollSec() {
+    return Math.max(15, int("SESSION_POLL_SEC", 60));
   },
   get baseUrl() {
     return process.env.BASE_URL ?? "http://localhost:3000";

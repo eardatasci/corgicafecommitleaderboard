@@ -31,5 +31,5 @@ export function startBackgroundJobs(): void {
 
   setInterval(() => {
     pollOpenSessions().catch((err) => console.error("poll failed:", err));
-  }, config.sessionPollMin * 60_000).unref();
+  }, config.sessionPollSec * 1_000).unref();
 }
