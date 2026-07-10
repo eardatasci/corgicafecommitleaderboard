@@ -71,4 +71,21 @@ describe("getLeaderboard", () => {
     expect(board.hereNow).toHaveLength(0);
     expect(board.allTime[0].totalCommits).toBe(2);
   });
+
+  it("includes each open session's statusText in here-now", async () => {
+    const alice = await makeUser("alice", 0);
+    const carol = await makeUser("carol", 0);
+    await handleHeartbeat(alice.id, CORGI, { fetchCount: async () => 100 });
+    await handleHeartbeat(carol.id, CORGI, { fetchCount: async () => 200 });
+    await db.session.updateMany({
+      where: { userId: alice.id },
+      data: { statusText: "corgi cam firmware" },
+    });
+
+    const board = await getLeaderboard();
+    expect(board.hereNow.map((u) => u.statusText)).toEqual([
+      "corgi cam firmware",
+      null,
+    ]);
+  });
 });

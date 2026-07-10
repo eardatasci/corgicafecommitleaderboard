@@ -10,13 +10,18 @@ export async function GET() {
 
   const user = await db.user.findUnique({
     where: { id: userId },
-    select: { username: true, avatarUrl: true, totalCommits: true },
+    select: {
+      username: true,
+      avatarUrl: true,
+      totalCommits: true,
+      lastStatusText: true,
+    },
   });
   if (!user) return NextResponse.json({ user: null });
 
   const open = await db.session.findFirst({
     where: { userId, status: "open" },
-    select: { commits: true, startedAt: true },
+    select: { commits: true, startedAt: true, statusText: true },
   });
 
   return NextResponse.json({
@@ -24,6 +29,8 @@ export async function GET() {
       ...user,
       present: Boolean(open),
       sessionCommits: open?.commits ?? 0,
+      sessionStatus: open?.statusText ?? null,
+      sessionSince: open?.startedAt.toISOString() ?? null,
     },
   });
 }

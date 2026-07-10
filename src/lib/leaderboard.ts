@@ -11,6 +11,7 @@ export interface HereNowEntry {
   avatarUrl: string;
   sessionCommits: number;
   since: Date;
+  statusText: string | null;
 }
 
 export interface Leaderboard {
@@ -32,7 +33,13 @@ export async function getLeaderboard(): Promise<Leaderboard> {
     db.session.findMany({
       where: { status: "open" },
       orderBy: [{ commits: "desc" }, { startedAt: "asc" }],
-      include: { user: { select: { username: true, avatarUrl: true } } },
+      select: {
+        userId: true,
+        commits: true,
+        startedAt: true,
+        statusText: true,
+        user: { select: { username: true, avatarUrl: true } },
+      },
     }),
   ]);
 
@@ -65,6 +72,7 @@ export async function getLeaderboard(): Promise<Leaderboard> {
       avatarUrl: s.user.avatarUrl,
       sessionCommits: s.commits,
       since: s.startedAt,
+      statusText: s.statusText,
     })),
   };
 }
