@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import { CafeDataProvider } from "@/components/cafe-data";
+import { Navbar } from "@/components/navbar";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -35,7 +37,12 @@ export default function RootLayout({
       lang="en"
       className={`${fraunces.variable} ${plexSans.variable} ${plexMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <CafeDataProvider>
+          <Navbar />
+          {children}
+        </CafeDataProvider>
+      </body>
     </html>
   );
 }
