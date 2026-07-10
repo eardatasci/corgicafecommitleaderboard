@@ -18,6 +18,7 @@ model User {
   avatarUrl      String    @map("avatar_url")
   encAccessToken String    @map("enc_access_token")
   totalCommits   Int       @default(0) @map("total_commits")
+  lastStatusText String?   @map("last_status_text")
   createdAt      DateTime  @default(now()) @map("created_at")
   sessions       Session[]
 
@@ -36,6 +37,7 @@ model Session {
   lastSeenAt   DateTime  @default(now()) @map("last_seen_at")
   lastIp       String    @map("last_ip")
   status       String    @default("open") // "open" | "closed"
+  statusText   String?   @map("status_text")
 
   @@index([status])
   @@index([userId, status])

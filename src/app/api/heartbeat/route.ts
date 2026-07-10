@@ -16,5 +16,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     present: result.present,
     sessionCommits: result.session?.commits ?? 0,
+    sessionStatus: result.session?.statusText ?? null,
+    sessionSince: result.session?.startedAt.toISOString() ?? null,
   });
 }
