@@ -143,6 +143,7 @@ button:focus-visible {
   visibility: hidden;
   transition: opacity 0.15s ease;
   pointer-events: none;
+  overflow-wrap: anywhere;
 }
 
 .receipt-row:hover .status-note,

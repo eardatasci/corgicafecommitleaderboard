@@ -45,7 +45,9 @@ interface CafeData {
   setSessionStatus: (statusText: string | null) => void;
 }
 
-const LEADERBOARD_POLL_MS = 20_000;
+// SSE delivers board changes instantly; the slow poll is a safety net for
+// networks that block event streams.
+const LEADERBOARD_FALLBACK_POLL_MS = 60_000;
 const HEARTBEAT_MS = 45_000;
 
 const CafeDataContext = createContext<CafeData | null>(null);
@@ -63,8 +65,21 @@ export function CafeDataProvider({ children }: { children: React.ReactNode }) {
   const [me, setMe] = useState<Me | null>(null);
   const [loaded, setLoaded] = useState(false);
 
-  // Leaderboard poll
+  // Live board: SSE push, with a slow poll as fallback
   useEffect(() => {
+    let es: EventSource | null = null;
+    try {
+      es = new EventSource("/api/stream");
+      es.onmessage = (ev) => {
+        try {
+          setBoard(JSON.parse(ev.data));
+        } catch {
+          /* malformed frame — fallback poll still covers us */
+        }
+      };
+    } catch {
+      /* EventSource unavailable — fallback poll takes over */
+    }
     const load = async () => {
       try {
         const res = await fetch("/api/leaderboard");
@@ -74,8 +89,11 @@ export function CafeDataProvider({ children }: { children: React.ReactNode }) {
       }
     };
     load();
-    const id = setInterval(load, LEADERBOARD_POLL_MS);
-    return () => clearInterval(id);
+    const id = setInterval(load, LEADERBOARD_FALLBACK_POLL_MS);
+    return () => {
+      es?.close();
+      clearInterval(id);
+    };
   }, []);
 
   // Who am I

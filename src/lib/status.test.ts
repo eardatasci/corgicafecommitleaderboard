@@ -60,6 +60,22 @@ describe("setStatus", () => {
     expect(session.statusText).toHaveLength(200);
   });
 
+  it("clamps to 200 code points without splitting a surrogate pair", async () => {
+    const user = await makeUser();
+    await checkIn(user.id);
+
+    // 300 dog emoji (each a surrogate pair) — well past STATUS_MAX_LEN.
+    const res = await setStatus(user.id, "🐕".repeat(300));
+    if (!res.ok) throw new Error("expected ok");
+    expect(res.statusText).toBe("🐕".repeat(STATUS_MAX_LEN));
+    expect(res.statusText).not.toMatch(/�/);
+    expect([...(res.statusText ?? "")]).toHaveLength(STATUS_MAX_LEN);
+
+    const session = await db.session.findFirstOrThrow({ where: { userId: user.id } });
+    expect(session.statusText).toBe("🐕".repeat(STATUS_MAX_LEN));
+    expect(session.statusText).not.toMatch(/�/);
+  });
+
   it("clears the session status on empty text but preserves lastStatusText", async () => {
     const user = await makeUser();
     await checkIn(user.id);

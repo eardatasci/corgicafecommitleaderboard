@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { notifyBoardChanged } from "./live";
 
 export const STATUS_MAX_LEN = 200;
 
@@ -15,7 +16,7 @@ export async function setStatus(
   userId: number,
   rawText: string,
 ): Promise<SetStatusResult> {
-  const text = rawText.trim().slice(0, STATUS_MAX_LEN).trimEnd();
+  const text = [...rawText.trim()].slice(0, STATUS_MAX_LEN).join("").trimEnd();
   const open = await db.session.findFirst({ where: { userId, status: "open" } });
   if (!open) return { ok: false, reason: "not_present" };
 
@@ -26,5 +27,6 @@ export async function setStatus(
       ? [db.user.update({ where: { id: userId }, data: { lastStatusText: statusText } })]
       : []),
   ]);
+  notifyBoardChanged();
   return { ok: true, statusText };
 }
