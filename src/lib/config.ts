@@ -56,7 +56,7 @@ export const config = {
    * the poll loop backs off automatically if a token's budget runs low.
    */
   get sessionPollSec() {
-    return Math.max(15, int("SESSION_POLL_SEC", 15));
+    return Math.max(5, int("SESSION_POLL_SEC", 15));
   },
   get baseUrl() {
     return process.env.BASE_URL ?? "http://localhost:3000";

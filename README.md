@@ -19,8 +19,9 @@ Design doc: [`docs/superpowers/specs/2026-07-09-corgi-cafe-commit-leaderboard-de
   (`totalCommitContributions + restrictedContributionsCount`); your session score
   is the counter delta, clamped at ≥ 0. Honestly labeled: it's *public commits +
   private contributions*, because GitHub doesn't break private activity down further.
-- **Board** — all-time ranking (sum of closed-session scores) plus a live
-  "now brewing" panel of who's checked in right now.
+- **Board** — all-time ranking (closed-session totals + live deltas) plus a
+  live "now brewing" panel of who's checked in right now. Updates stream to
+  open tabs over SSE the moment they happen, with slow polling as fallback.
 
 ## Stack
 
@@ -68,7 +69,7 @@ with GitHub mocked.
 | `TRUSTED_PROXY_HOPS` | Fallback: rightmost `X-Forwarded-For` entries you control (1 behind one proxy) |
 | `BASE_URL` | Public URL of the app (OAuth redirects) |
 | `HEARTBEAT_TIMEOUT_MIN` | Grace window before marking OUT (default 5) |
-| `SESSION_POLL_SEC` | In-session contribution re-query interval (default 15, floor 15; backs off automatically when a token's rate budget runs low) |
+| `SESSION_POLL_SEC` | In-session contribution re-query interval (default 15, floor 5; backs off automatically when a token's rate budget runs low) |
 | `DEV_FAKE_IP` | Dev only: pretend heartbeats come from this IP. Never set in prod |
 
 ## Deploying (free tier)

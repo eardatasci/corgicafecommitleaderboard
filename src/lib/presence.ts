@@ -4,6 +4,7 @@ import { config } from "./config";
 import { isCorgiIp } from "./ip";
 import { sessionCommits } from "./delta";
 import { fetchContributionCountForUser } from "./github";
+import { notifyBoardChanged } from "./live";
 
 export type FetchCount = (user: User) => Promise<number>;
 
@@ -67,6 +68,7 @@ export async function handleHeartbeat(
       currentCount: count,
     },
   });
+  notifyBoardChanged();
   return { present: true, session };
 }
 
@@ -97,6 +99,7 @@ async function closeSession(
       data: { totalCommits: { increment: commits } },
     }),
   ]);
+  notifyBoardChanged();
 }
 
 /**
@@ -123,9 +126,11 @@ export async function pollOpenSessions(opts: Opts = {}): Promise<void> {
     where: { status: "open" },
     include: { user: true },
   });
+  let changed = false;
   for (const session of open) {
     try {
       const count = await fetchCount(session.user);
+      if (count !== session.currentCount) changed = true;
       await db.session.update({
         where: { id: session.id },
         data: {
@@ -138,4 +143,5 @@ export async function pollOpenSessions(opts: Opts = {}): Promise<void> {
       // delta from startCount, so nothing is double counted.
     }
   }
+  if (changed) notifyBoardChanged();
 }

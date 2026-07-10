@@ -28,7 +28,9 @@ interface Me {
   sessionCommits: number;
 }
 
-const LEADERBOARD_POLL_MS = 20_000;
+// SSE delivers board changes instantly; the slow poll is a safety net for
+// networks that block event streams.
+const LEADERBOARD_FALLBACK_POLL_MS = 60_000;
 const HEARTBEAT_MS = 45_000;
 
 function timeIn(since: string): string {
@@ -42,8 +44,21 @@ export default function Home() {
   const [me, setMe] = useState<Me | null>(null);
   const [loaded, setLoaded] = useState(false);
 
-  // Leaderboard poll
+  // Live board: SSE push, with a slow poll as fallback
   useEffect(() => {
+    let es: EventSource | null = null;
+    try {
+      es = new EventSource("/api/stream");
+      es.onmessage = (ev) => {
+        try {
+          setBoard(JSON.parse(ev.data));
+        } catch {
+          /* malformed frame — fallback poll still covers us */
+        }
+      };
+    } catch {
+      /* EventSource unavailable — fallback poll takes over */
+    }
     const load = async () => {
       try {
         const res = await fetch("/api/leaderboard");
@@ -53,8 +68,11 @@ export default function Home() {
       }
     };
     load();
-    const id = setInterval(load, LEADERBOARD_POLL_MS);
-    return () => clearInterval(id);
+    const id = setInterval(load, LEADERBOARD_FALLBACK_POLL_MS);
+    return () => {
+      es?.close();
+      clearInterval(id);
+    };
   }, []);
 
   // Who am I
@@ -248,7 +266,7 @@ function HereNow({ entries }: { entries?: HereNowEntry[] }) {
           className="font-data text-center text-[0.65rem] tracking-wider"
           style={{ color: "rgba(51,36,26,0.55)" }}
         >
-          commits this visit · updates every ~15 sec
+          commits this visit · streamed live
         </p>
       </div>
     </section>
