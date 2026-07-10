@@ -21,9 +21,13 @@ export interface Leaderboard {
 export async function getLeaderboard(): Promise<Leaderboard> {
   const [users, openSessions] = await Promise.all([
     db.user.findMany({
-      orderBy: [{ totalCommits: "desc" }, { createdAt: "asc" }],
-      take: 100,
-      select: { username: true, avatarUrl: true, totalCommits: true },
+      select: {
+        id: true,
+        username: true,
+        avatarUrl: true,
+        totalCommits: true,
+        createdAt: true,
+      },
     }),
     db.session.findMany({
       where: { status: "open" },
@@ -32,8 +36,30 @@ export async function getLeaderboard(): Promise<Leaderboard> {
     }),
   ]);
 
+  // All-time = closed-session totals plus the live delta of an open session,
+  // so the board always agrees with the "here now" panel.
+  const liveByUser = new Map(openSessions.map((s) => [s.userId, s.commits]));
+  const allTime = users
+    .map((u) => ({
+      username: u.username,
+      avatarUrl: u.avatarUrl,
+      totalCommits: u.totalCommits + (liveByUser.get(u.id) ?? 0),
+      createdAt: u.createdAt,
+    }))
+    .sort(
+      (a, b) =>
+        b.totalCommits - a.totalCommits ||
+        a.createdAt.getTime() - b.createdAt.getTime(),
+    )
+    .slice(0, 100)
+    .map(({ username, avatarUrl, totalCommits }) => ({
+      username,
+      avatarUrl,
+      totalCommits,
+    }));
+
   return {
-    allTime: users,
+    allTime,
     hereNow: openSessions.map((s) => ({
       username: s.user.username,
       avatarUrl: s.user.avatarUrl,

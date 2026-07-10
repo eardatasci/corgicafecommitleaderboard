@@ -39,12 +39,27 @@ describe("getLeaderboard", () => {
 
     const board = await getLeaderboard();
 
+    // all-time includes live open-session deltas (alice: 30 closed + 4 live)
     expect(board.allTime.map((u) => u.username)).toEqual(["bob", "carol", "alice"]);
-    expect(board.allTime.map((u) => u.totalCommits)).toEqual([80, 55, 30]);
+    expect(board.allTime.map((u) => u.totalCommits)).toEqual([80, 55, 34]);
 
     expect(board.hereNow.map((u) => u.username)).toEqual(["alice", "carol"]);
     expect(board.hereNow[0].sessionCommits).toBe(4);
     expect(board.hereNow[1].sessionCommits).toBe(0);
+  });
+
+  it("re-ranks all-time when a live session overtakes a closed total", async () => {
+    const alice = await makeUser("alice", 10);
+    await makeUser("bob", 12);
+    await handleHeartbeat(alice.id, CORGI, { fetchCount: async () => 100 });
+    await db.session.updateMany({
+      where: { userId: alice.id },
+      data: { currentCount: 105, commits: 5 },
+    });
+
+    const board = await getLeaderboard();
+    expect(board.allTime.map((u) => u.username)).toEqual(["alice", "bob"]);
+    expect(board.allTime[0].totalCommits).toBe(15);
   });
 
   it("excludes closed sessions from here-now", async () => {
