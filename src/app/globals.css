@@ -110,3 +110,49 @@ button:focus-visible {
   outline-offset: 2px;
   border-radius: 2px;
 }
+
+/* --- receipt scaling (width steps with occupancy) --------------------- */
+
+.receipt-wrap {
+  transition: max-width 0.6s ease;
+}
+
+/* --- barista pen notes (status tooltips on the receipt) --------------- */
+
+.receipt-row {
+  position: relative;
+}
+
+.receipt-row .status-note {
+  position: absolute;
+  left: 2.25rem;
+  bottom: calc(100% + 0.4rem);
+  z-index: 10;
+  width: max-content;
+  max-width: min(18rem, 80vw);
+  padding: 0.45rem 0.65rem;
+  background: #fdf6e9;
+  color: var(--receipt-ink);
+  border: 1px solid rgba(51, 36, 26, 0.35);
+  border-radius: 2px;
+  box-shadow: 2px 3px 0 rgba(51, 36, 26, 0.18);
+  font-size: 0.7rem;
+  line-height: 1.45;
+  transform: rotate(-2deg);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.receipt-row:hover .status-note,
+.receipt-row:focus-visible .status-note,
+.receipt-row:focus-within .status-note {
+  opacity: 1;
+  visibility: visible;
+}
+
+.status-cue {
+  text-decoration: underline dotted rgba(51, 36, 26, 0.5);
+  text-underline-offset: 3px;
+}
