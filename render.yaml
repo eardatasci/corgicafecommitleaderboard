@@ -1,0 +1,31 @@
+# Render Blueprint — free-tier deploy.
+# Dashboard: New + → Blueprint → pick this repo. Render reads this file and
+# prompts for the sync:false env vars.
+services:
+  - type: web
+    name: corgi-cafe-commit-leaderboard
+    runtime: node
+    plan: free
+    buildCommand: >-
+      npm ci &&
+      npx prisma generate --schema prisma/schema.postgres.prisma &&
+      npx prisma db push --schema prisma/schema.postgres.prisma &&
+      npm run build
+    startCommand: npm start
+    healthCheckPath: /api/leaderboard
+    envVars:
+      - key: DATABASE_URL # Neon/Supabase Postgres URL (include ?sslmode=require)
+        sync: false
+      - key: GITHUB_CLIENT_ID # prod OAuth App (not the localhost one)
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: TOKEN_ENC_KEY # openssl rand -hex 32
+        sync: false
+      - key: CORGI_IPS # cafe router public IP(s), comma-separated
+        sync: false
+      - key: BASE_URL
+        value: https://corgicafecommitleaderboard.com
+      - key: TRUSTED_PROXY_HOPS
+        value: "1"
+      # DEV_FAKE_IP must never be set here — it would mark everyone present.

@@ -75,13 +75,16 @@ also run lazily (throttled) on every heartbeat/leaderboard request, so the app
 stays correct on free hosts that spin down when idle — heartbeats keep it awake
 while anyone is actually in the cafe.
 
-Recommended free setup:
+Recommended free setup (this repo ships a [`render.yaml`](render.yaml) blueprint):
 
-1. **Render free web service** (or any free Node host). Build:
-   `npm run build`, start: `npm start`. Set `TRUSTED_PROXY_HOPS=1`.
-2. **Neon or Supabase free Postgres** — Render's free tier has no persistent
-   disk, so SQLite won't survive deploys. Change the `provider` in
-   `prisma/schema.prisma` to `postgresql`, point `DATABASE_URL` at the free
-   Postgres, and run `npx prisma migrate deploy`.
-3. Point the GitHub OAuth App's callback at
-   `https://<your-app>/auth/github/callback` and set `BASE_URL` to match.
+1. **Neon or Supabase free Postgres** — Render's free tier has no persistent
+   disk, so SQLite won't survive deploys. Prod uses
+   [`prisma/schema.postgres.prisma`](prisma/schema.postgres.prisma) (keep its
+   models in sync with `schema.prisma`, which stays SQLite for dev/tests).
+2. **Render** — New + → Blueprint → pick this repo. Render reads `render.yaml`,
+   builds with `prisma db push` against the Postgres schema, and prompts for
+   the secrets (`DATABASE_URL`, OAuth credentials, `TOKEN_ENC_KEY`, `CORGI_IPS`).
+3. **Custom domain** — add it under the service's Settings → Custom Domains and
+   create the DNS records Render shows you. HTTPS is automatic.
+4. Point the prod GitHub OAuth App's callback at
+   `https://<your-domain>/auth/github/callback` and set `BASE_URL` to match.
