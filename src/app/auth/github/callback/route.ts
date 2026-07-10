@@ -3,7 +3,12 @@ import { db } from "@/lib/db";
 import { exchangeCodeForToken, fetchViewer } from "@/lib/github";
 import { encryptToken, signSession } from "@/lib/crypto";
 import { config } from "@/lib/config";
-import { SESSION_COOKIE, STATE_COOKIE, sessionCookieOptions } from "@/lib/auth";
+import {
+  SESSION_COOKIE,
+  STATE_COOKIE,
+  cookieDomain,
+  sessionCookieOptions,
+} from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
@@ -35,7 +40,11 @@ export async function GET(req: NextRequest) {
 
     const res = NextResponse.redirect(`${config.baseUrl}/`);
     res.cookies.set(SESSION_COOKIE, signSession(user.id), sessionCookieOptions());
-    res.cookies.delete(STATE_COOKIE);
+    res.cookies.set(STATE_COOKIE, "", {
+      path: "/",
+      domain: cookieDomain(),
+      maxAge: 0,
+    });
     return res;
   } catch (err) {
     console.error("OAuth callback failed:", err);
