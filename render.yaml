@@ -26,6 +26,8 @@ services:
         sync: false
       - key: BASE_URL
         value: https://corgicafecommitleaderboard.com
-      - key: TRUSTED_PROXY_HOPS
-        value: "1"
+      # Render fronts custom domains with Cloudflare, which overwrites
+      # true-client-ip with the real visitor IP (verified unspoofable).
+      - key: TRUSTED_IP_HEADER
+        value: true-client-ip
       # DEV_FAKE_IP must never be set here — it would mark everyone present.

@@ -34,6 +34,15 @@ export const config = {
   get trustedProxyHops() {
     return int("TRUSTED_PROXY_HOPS", 1);
   },
+  /**
+   * A single header the edge proxy overwrites with the real client IP
+   * (verified unspoofable), e.g. "true-client-ip" on Render/Cloudflare.
+   * When set, it wins over X-Forwarded-For hop counting.
+   */
+  get trustedIpHeader() {
+    const h = process.env.TRUSTED_IP_HEADER?.trim().toLowerCase();
+    return h || null;
+  },
   get devFakeIp() {
     return process.env.DEV_FAKE_IP ?? null;
   },

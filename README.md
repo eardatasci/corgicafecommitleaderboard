@@ -62,7 +62,8 @@ with GitHub mocked.
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | OAuth App credentials |
 | `TOKEN_ENC_KEY` | 32-byte hex key: token encryption + session-cookie signing |
 | `CORGI_IPS` | Comma-separated public IP(s) of the cafe router |
-| `TRUSTED_PROXY_HOPS` | Rightmost `X-Forwarded-For` entries you control (1 behind one proxy) |
+| `TRUSTED_IP_HEADER` | Header the edge proxy overwrites with the real client IP (`true-client-ip` on Render); wins over hop counting |
+| `TRUSTED_PROXY_HOPS` | Fallback: rightmost `X-Forwarded-For` entries you control (1 behind one proxy) |
 | `BASE_URL` | Public URL of the app (OAuth redirects) |
 | `HEARTBEAT_TIMEOUT_MIN` | Grace window before marking OUT (default 5) |
 | `SESSION_POLL_MIN` | In-session contribution re-query interval (default 3) |

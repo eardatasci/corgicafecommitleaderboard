@@ -1,3 +1,5 @@
+import { config } from "./config";
+
 /**
  * Real client IP from X-Forwarded-For, trusting exactly `trustedHops`
  * rightmost entries (the ones appended by proxies we control). Anything the
@@ -24,4 +26,18 @@ export function normalizeIp(ip: string): string {
 export function isCorgiIp(ip: string | null, corgiIps: string[]): boolean {
   if (!ip) return false;
   return corgiIps.includes(normalizeIp(ip));
+}
+
+/**
+ * The client IP the presence check trusts for a request:
+ * DEV_FAKE_IP (local dev) → TRUSTED_IP_HEADER (a header the edge proxy
+ * overwrites, e.g. true-client-ip on Render) → X-Forwarded-For hop counting.
+ */
+export function resolveClientIp(headers: Headers): string | null {
+  if (config.devFakeIp) return config.devFakeIp;
+  if (config.trustedIpHeader) {
+    const value = headers.get(config.trustedIpHeader);
+    return value ? normalizeIp(value.trim()) : null;
+  }
+  return clientIpFromXff(headers.get("x-forwarded-for"), config.trustedProxyHops);
 }

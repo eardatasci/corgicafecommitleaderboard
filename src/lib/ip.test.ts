@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { clientIpFromXff, isCorgiIp } from "./ip";
+import { describe, it, expect, afterEach } from "vitest";
+import { clientIpFromXff, isCorgiIp, resolveClientIp } from "./ip";
 
 describe("clientIpFromXff", () => {
   it("takes the last entry with one trusted hop", () => {
@@ -24,6 +24,42 @@ describe("clientIpFromXff", () => {
 
   it("trims whitespace and strips IPv6-mapped prefix", () => {
     expect(clientIpFromXff("  ::ffff:203.0.113.7  ", 1)).toBe("203.0.113.7");
+  });
+});
+
+describe("resolveClientIp", () => {
+  afterEach(() => {
+    delete process.env.TRUSTED_IP_HEADER;
+    delete process.env.DEV_FAKE_IP;
+  });
+
+  it("uses the trusted header when configured, ignoring X-Forwarded-For", () => {
+    process.env.TRUSTED_IP_HEADER = "true-client-ip";
+    const headers = new Headers({
+      "true-client-ip": "203.0.113.7",
+      "x-forwarded-for": "6.6.6.6, 104.23.160.149, 10.27.55.132",
+    });
+    expect(resolveClientIp(headers)).toBe("203.0.113.7");
+  });
+
+  it("returns null when the trusted header is configured but absent", () => {
+    process.env.TRUSTED_IP_HEADER = "true-client-ip";
+    const headers = new Headers({ "x-forwarded-for": "203.0.113.7" });
+    expect(resolveClientIp(headers)).toBeNull();
+  });
+
+  it("falls back to X-Forwarded-For hop counting when no header configured", () => {
+    const headers = new Headers({
+      "x-forwarded-for": "6.6.6.6, 198.51.100.9",
+    });
+    expect(resolveClientIp(headers)).toBe("198.51.100.9"); // TRUSTED_PROXY_HOPS=1
+  });
+
+  it("prefers DEV_FAKE_IP over everything (local dev)", () => {
+    process.env.DEV_FAKE_IP = "203.0.113.8";
+    process.env.TRUSTED_IP_HEADER = "true-client-ip";
+    const headers = new Headers({ "true-client-ip": "1.2.3.4" });
+    expect(resolveClientIp(headers)).toBe("203.0.113.8");
   });
 });
 
